@@ -25,13 +25,6 @@ const state = {
 // --- Math Functions ---
 
 // 1. Embedding in R^{2,2} - Direct coordinates from (r, φ, t)
-// Metric: -(X^{-1})² - (X⁰)² + (X¹)² + (X²)² = -l²
-// 
-// From article:
-// X^{-1} = sqrt(r²/M) * cosh(√M φ)
-// X^2 = sqrt(r²/M) * sinh(√M φ)
-// X^0 = sqrt(r²/M - l²) * sinh(√M t/l)
-// X^1 = sqrt(r²/M - l²) * cosh(√M t/l)
 function getEmbeddingCoords(r, phi, t) {
     const M = CONFIG.M;
     const l = CONFIG.l;
@@ -61,7 +54,6 @@ function getEmbeddingCoords(r, phi, t) {
 }
 
 // 2. Lorentz Boost in (X⁰, X¹) plane
-// Preserves -(X⁰)² + (X¹)²
 function rotateBoost(coords, lambda) {
     const ch = Math.cosh(lambda);
     const sh = Math.sinh(lambda);
@@ -95,23 +87,14 @@ function rotateSpatial(coords, theta) {
 }
 
 
-// 3. Poincaré Disk Mapping
-// We map the radial coordinate r to a disk radius R_disk.
-// New Mapping: R_disk = tanh(r / l)
-// This strictly maps [0, inf) to [0, 1).
-// The horizon is at r_h. So the "hole" radius will be tanh(r_h / l).
-// Since r_h = l * sqrt(M), this means Hole Radius = tanh(sqrt(M)).
-// This ensures the visual size changes with Mass parameter M.
+// 4. Poincaré Disk Mapping
 function getPoincareCoords(r, phi) {
     const l = CONFIG.l;
 
-    // Physical mapping
-    // Scale r by l to be dimensionless
-    const R_disk = Math.tanh(r / (2 * l)); // Factor of 2 to make it less crowded near edge
+    // Physical mapping: R_disk = tanh(r / (2 * l))
+    const R_disk = Math.tanh(r / (2 * l));
 
-    // Z-coordinate: Flat disk (no artificial waves)
     const z = 0;
-
     const x = R_disk * Math.cos(phi);
     const y = R_disk * Math.sin(phi);
 
@@ -123,8 +106,8 @@ const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x050505);
 
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000); // Increased far clipping plane
-camera.position.set(8, 8, 6); // Increased from (3, 3, 2) for better overview
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
+camera.position.set(8, 8, 6);
 camera.up.set(0, 0, 1);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, failIfMajorPerformanceCaveat: false });
@@ -150,7 +133,6 @@ dirLight.position.set(5, 5, 10);
 scene.add(dirLight);
 
 // --- Mesh Generation ---
-// Using a dense grid
 const geometry = new THREE.PlaneGeometry(1, 1, CONFIG.grid_r, CONFIG.grid_phi);
 const material = new THREE.MeshPhongMaterial({
     side: THREE.DoubleSide,
@@ -174,7 +156,7 @@ scene.add(horizonMesh);
 
 
 // --- Helpers ---
-const axesHelper = new THREE.AxesHelper(5); // Increased from 1.5 to 5
+const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
 
 // Axis Labels
@@ -184,7 +166,7 @@ function createLabel(text, position, color, size = 0.3) {
     canvas.height = 32;
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = color;
-    ctx.font = '20px Arial'; // Smaller font
+    ctx.font = '20px Arial';
     ctx.fillText(text, 10, 22);
 
     const texture = new THREE.CanvasTexture(canvas);
@@ -225,14 +207,11 @@ const vertexCount = geometry.attributes.position.count;
 const logicCoords = new Float32Array(vertexCount * 2); // r, phi
 
 // Initialize Mesh Data
-// Initialize Mesh Data
 function initGrid() {
     const widthVerts = CONFIG.grid_r + 1;
     const heightVerts = CONFIG.grid_phi + 1;
     const r_h = CONFIG.l * Math.sqrt(CONFIG.M);
     const r_start = r_h * CONFIG.r_min_factor;
-    // Use state.r_max if available, otherwise fallback to CONFIG (though we will sync them)
-    // Actually, let's use CONFIG.r_max_factor as the source of truth which is updated by UI
     const r_end = r_h * CONFIG.r_max_factor;
 
     const colors = [];
@@ -248,24 +227,19 @@ function initGrid() {
 
         const r = r_start + u * (r_end - r_start);
 
-        // Phi range depends on mode
-        // For Poincare: 0 to 2pi (Full donut)
-        // For Embedding: Limited range (Strip)
-        // We will update phi dynamically or store "normalized" phi
+        // Use normalized phi here, map later
         const phi_normalized = v; // 0 to 1
 
         logicCoords[2 * i] = r;
         logicCoords[2 * i + 1] = phi_normalized;
 
-        // Static Color (Radius based) - Highlighting Horizon
-        // Horizon (u=0) = Red (Hue 0.0) -> Hot
-        // Outer (u=1) = Blue (Hue 0.6) -> Cold
+        // Static Color (Radius based)
         const t_c = u;
         colorObj.setHSL(0.0 + 0.6 * t_c, 1.0, 0.5); // Red (0.0) -> Blue (0.6)
         colors.push(colorObj.r, colorObj.g, colorObj.b);
     }
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-    geometry.attributes.color.needsUpdate = true; // Ensure colors update when grid changes
+    geometry.attributes.color.needsUpdate = true;
 }
 
 function updateMesh() {
@@ -281,7 +255,7 @@ function updateMesh() {
     } else {
         phi_min = -state.phi_limit;
         phi_max = state.phi_limit;
-        horizonMesh.visible = false; // Horizon line doesn't make sense in open strip 4D view easily
+        horizonMesh.visible = false;
     }
 
     for (let i = 0; i < vertexCount; i++) {
@@ -290,33 +264,24 @@ function updateMesh() {
         const phi = phi_min + phi_norm * (phi_max - phi_min);
 
         if (CONFIG.mode === 'embedding') {
-            // 4D Embedding View: 
-            // 1. Generate base coords
             const base = getEmbeddingCoords(r, phi, state.t);
-            // 2. Apply Lorentz Boost in (X0, X1)
             const boosted = rotateBoost(base, state.boost);
-            // 3. Apply Spatial Rotation in (X1, X2)
             const rot = rotateSpatial(boosted, state.rotSpatial);
 
-            // Map to 3D visualization axes: (X⁻¹, X¹, X²)
-            positions[3 * i] = rot.X_minus1;  // x-axis
-            positions[3 * i + 1] = rot.X1;    // y-axis
-            positions[3 * i + 2] = rot.X2;    // z-axis
+            positions[3 * i] = rot.X_minus1;
+            positions[3 * i + 1] = rot.X1;
+            positions[3 * i + 2] = rot.X2;
 
         } else {
-            // Poincare View
             const res = getPoincareCoords(r, phi);
             positions[3 * i] = res.x;
             positions[3 * i + 1] = res.y;
-            positions[3 * i + 2] = res.z; // Flat disk, no artifacts
+            positions[3 * i + 2] = res.z;
         }
     }
 
     // Update Horizon Indicator for Poincare Mode
     if (CONFIG.mode === 'poincare') {
-        // Horizon radius in physical units: r_h = l * sqrt(M)
-        // Poincaré disk radius: R_disk = tanh(r_h / (2*l)) = tanh(sqrt(M)/2)
-        // This correctly depends on M but is independent of l (as it should be for normalized coords)
         const r_h_disk = Math.tanh(Math.sqrt(CONFIG.M) / 2);
         horizonMesh.rotation.set(0, 0, 0);
         horizonMesh.scale.set(r_h_disk, r_h_disk, 1);
@@ -326,7 +291,7 @@ function updateMesh() {
     geometry.computeVertexNormals();
 }
 
-// --- Interaction ---
+// --- Interaction UI Elements ---
 const ui_mode = document.getElementById('viz-mode');
 const ui_time = document.getElementById('time');
 const ui_boost = document.getElementById('param-boost');
@@ -336,6 +301,7 @@ const ui_param_M = document.getElementById('param-M');
 const ui_param_l = document.getElementById('param-l');
 const ui_phi_limit = document.getElementById('param-phi-limit');
 const ui_r_max_factor = document.getElementById('param-r-max');
+const ui_param_beta = document.getElementById('param-beta');
 
 const ui_time_min = document.getElementById('time-min');
 const ui_time_max = document.getElementById('time-max');
@@ -343,6 +309,15 @@ const ui_time_max = document.getElementById('time-max');
 const val_time = document.getElementById('time-val');
 const val_boost = document.getElementById('param-boost-val');
 const val_rotSpatial = document.getElementById('rotSpatial-val');
+
+const val_M = document.getElementById('val-M');
+const val_l = document.getElementById('val-l');
+const val_phi = document.getElementById('val-phi');
+const val_beta = document.getElementById('val-beta');
+const val_r_max = document.getElementById('val-r-max');
+
+
+// --- Logic Handling ---
 
 function updateState() {
     state.t = parseFloat(ui_time.value);
@@ -356,13 +331,6 @@ function updateState() {
     val_rotSpatial.innerText = state.rotSpatial.toFixed(2);
 }
 
-// Parameter values display
-const val_M = document.getElementById('val-M');
-const val_l = document.getElementById('val-l');
-const val_phi = document.getElementById('val-phi');
-const val_beta = document.getElementById('val-beta');
-const val_r_max = document.getElementById('val-r-max');
-
 // Helper to calculate Beta from M, l
 function calculateBeta(M, l) {
     if (M <= 0) return 0;
@@ -371,7 +339,7 @@ function calculateBeta(M, l) {
 
 // Helper to calculate M from Beta, l
 function calculateM(beta, l) {
-    if (beta <= 0) return 0.1; // Prevent division by zero
+    if (beta <= 0) return 0.1;
     const sqrtM = (2 * Math.PI * l) / beta;
     return sqrtM * sqrtM;
 }
@@ -379,7 +347,7 @@ function calculateM(beta, l) {
 // Initial Sync
 {
     const initBeta = calculateBeta(CONFIG.M, CONFIG.l);
-    document.getElementById('param-beta').value = initBeta.toFixed(1);
+    ui_param_beta.value = initBeta.toFixed(1);
     val_beta.innerText = initBeta.toFixed(1);
 }
 
@@ -389,14 +357,14 @@ function updateParams(sourceElement) {
     let new_l = parseFloat(ui_param_l.value);
     const new_phi = parseFloat(ui_phi_limit.value);
     const new_r_max = parseFloat(ui_r_max_factor.value);
-    let new_beta = parseFloat(document.getElementById('param-beta').value);
+    let new_beta = parseFloat(ui_param_beta.value);
 
     // Synchronize M and Beta
     if (sourceElement === ui_param_M || sourceElement === ui_param_l) {
         // M or l changed -> Update Beta
         new_beta = calculateBeta(new_M, new_l);
-        document.getElementById('param-beta').value = new_beta.toFixed(1);
-    } else if (sourceElement === document.getElementById('param-beta')) {
+        ui_param_beta.value = new_beta.toFixed(1);
+    } else if (sourceElement === ui_param_beta) {
         // Beta changed -> Update M (keep l fixed)
         new_M = calculateM(new_beta, new_l);
         // Clamp M to slider range
@@ -406,7 +374,7 @@ function updateParams(sourceElement) {
 
         // Re-calculate beta if M hit a limit to keep UI consistent
         new_beta = calculateBeta(new_M, new_l);
-        document.getElementById('param-beta').value = new_beta.toFixed(1);
+        ui_param_beta.value = new_beta.toFixed(1);
     }
 
     // Update value labels
@@ -431,12 +399,18 @@ function updateRanges() {
     ui_time.max = ui_time_max.value;
 }
 
-// Event Listeners
-[ui_time, ui_boost, ui_rotSpatial].forEach(el => el.addEventListener('input', updateState));
+// --- Event Listeners ---
+
+// State Inputs
+[ui_time, ui_boost, ui_rotSpatial].forEach(el => el.addEventListener('input', () => {
+    updateState();
+    updateMesh();
+}));
 
 // Parameter Inputs
-updateParams();
-updateMesh();
+[ui_param_M, ui_param_l, ui_phi_limit, ui_r_max_factor, ui_param_beta].forEach(el => el.addEventListener('input', (e) => {
+    updateParams(e.target);
+    updateMesh();
 }));
 
 // Range Inputs
@@ -460,7 +434,7 @@ ui_mode.addEventListener('change', () => {
     updateState();
     if (CONFIG.mode === 'poincare') {
         controls.reset();
-        camera.position.set(0, 0, 3.5); // Increased for better view
+        camera.position.set(0, 0, 3.5);
         camera.lookAt(0, 0, 0);
         axesHelper.visible = false;
         diskGridHelper.visible = true;
@@ -475,7 +449,7 @@ ui_mode.addEventListener('change', () => {
         tick0.visible = false;
     } else {
         controls.reset();
-        camera.position.set(8, 8, 6); // Updated to match initial position
+        camera.position.set(8, 8, 6);
         axesHelper.visible = true;
         diskGridHelper.visible = false;
         // Show 3D axis labels in Embedding mode
@@ -498,13 +472,13 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// Loop
-initGrid(); // Initial generation
-updateState(); // Initial state sync
+// --- Main Loop ---
+initGrid();
+updateState();
 
 function animate() {
     requestAnimationFrame(animate);
-    updateMesh(); // Dynamic update every frame
+    updateMesh();
     controls.update();
     renderer.render(scene, camera);
 }

@@ -334,12 +334,6 @@ const ui_rotSpatial = document.getElementById('rotSpatial');
 
 // Removed duplicate parameter declarations (they are declared below with tau)
 
-const ui_time_min = document.getElementById('time-min');
-const ui_time_max = document.getElementById('time-max');
-
-const val_time = document.getElementById('time-val');
-const val_boost = document.getElementById('param-boost-val');
-const val_rotSpatial = document.getElementById('rotSpatial-val');
 
 function updateState() {
     state.t = parseFloat(ui_time.value);

@@ -198,11 +198,10 @@ span {
         display: block;
         /* Visible on mobile */
         position: fixed;
-        bottom: 30px;
-        /* Moved to bottom for reachability and visibility */
+        top: 20px;
+        /* Top Right */
         right: 20px;
-        top: auto;
-        /* Cancel top positioning */
+        bottom: auto;
         z-index: 2000;
         /* Ensure it's on top of everything */
         width: 50px;

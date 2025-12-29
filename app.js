@@ -360,27 +360,69 @@ function updateState() {
 const val_M = document.getElementById('val-M');
 const val_l = document.getElementById('val-l');
 const val_phi = document.getElementById('val-phi');
+const val_beta = document.getElementById('val-beta');
 const val_r_max = document.getElementById('val-r-max');
 
-function updateParams() {
-    const new_M = parseFloat(ui_param_M.value);
-    const new_l = parseFloat(ui_param_l.value);
+// Helper to calculate Beta from M, l
+function calculateBeta(M, l) {
+    if (M <= 0) return 0;
+    return (2 * Math.PI * l) / Math.sqrt(M);
+}
+
+// Helper to calculate M from Beta, l
+function calculateM(beta, l) {
+    if (beta <= 0) return 0.1; // Prevent division by zero
+    const sqrtM = (2 * Math.PI * l) / beta;
+    return sqrtM * sqrtM;
+}
+
+// Initial Sync
+{
+    const initBeta = calculateBeta(CONFIG.M, CONFIG.l);
+    document.getElementById('param-beta').value = initBeta.toFixed(1);
+    val_beta.innerText = initBeta.toFixed(1);
+}
+
+function updateParams(sourceElement) {
+    // Read current values
+    let new_M = parseFloat(ui_param_M.value);
+    let new_l = parseFloat(ui_param_l.value);
     const new_phi = parseFloat(ui_phi_limit.value);
     const new_r_max = parseFloat(ui_r_max_factor.value);
+    let new_beta = parseFloat(document.getElementById('param-beta').value);
+
+    // Synchronize M and Beta
+    if (sourceElement === ui_param_M || sourceElement === ui_param_l) {
+        // M or l changed -> Update Beta
+        new_beta = calculateBeta(new_M, new_l);
+        document.getElementById('param-beta').value = new_beta.toFixed(1);
+    } else if (sourceElement === document.getElementById('param-beta')) {
+        // Beta changed -> Update M (keep l fixed)
+        new_M = calculateM(new_beta, new_l);
+        // Clamp M to slider range
+        if (new_M < 0.1) new_M = 0.1;
+        if (new_M > 5.0) new_M = 5.0;
+        ui_param_M.value = new_M.toFixed(1);
+
+        // Re-calculate beta if M hit a limit to keep UI consistent
+        new_beta = calculateBeta(new_M, new_l);
+        document.getElementById('param-beta').value = new_beta.toFixed(1);
+    }
 
     // Update value labels
     val_M.innerText = new_M.toFixed(1);
     val_l.innerText = new_l.toFixed(1);
     val_phi.innerText = new_phi.toFixed(1);
+    val_beta.innerText = new_beta.toFixed(1);
     val_r_max.innerText = new_r_max.toFixed(1);
 
     // Check if grid regeneration needed
-    if (new_M !== CONFIG.M || new_l !== CONFIG.l || new_phi !== state.phi_limit || new_r_max !== CONFIG.r_max_factor) {
+    if (Math.abs(new_M - CONFIG.M) > 0.01 || Math.abs(new_l - CONFIG.l) > 0.01 || new_phi !== state.phi_limit || new_r_max !== CONFIG.r_max_factor) {
         CONFIG.M = new_M;
         CONFIG.l = new_l;
         CONFIG.r_max_factor = new_r_max;
         state.phi_limit = new_phi;
-        initGrid(); // Regenerate grid data
+        initGrid();
     }
 }
 
@@ -393,9 +435,8 @@ function updateRanges() {
 [ui_time, ui_boost, ui_rotSpatial].forEach(el => el.addEventListener('input', updateState));
 
 // Parameter Inputs
-[ui_param_M, ui_param_l, ui_phi_limit, ui_r_max_factor].forEach(el => el.addEventListener('input', () => {
-    updateParams();
-    updateMesh();
+updateParams();
+updateMesh();
 }));
 
 // Range Inputs

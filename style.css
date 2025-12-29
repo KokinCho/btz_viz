@@ -153,3 +153,43 @@ span {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 10px;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    #ui-container {
+        top: auto;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        max-height: 50vh;
+        border-radius: 20px 20px 0 0;
+        box-sizing: border-box;
+        overflow-y: auto;
+        padding-bottom: 20px;
+        /* Safe area for bottom */
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+    }
+
+    h1 {
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+    }
+
+    .control-group {
+        margin-bottom: 12px;
+    }
+
+    input[type=range] {
+        height: 24px;
+        /* Easier touch target */
+    }
+
+    label {
+        font-size: 1rem;
+        /* Readable font size */
+    }
+}

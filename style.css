@@ -1,0 +1,155 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #000;
+    color: #fff;
+}
+
+#canvas-container {
+    width: 100vw;
+    height: 100vh;
+    display: block;
+}
+
+#ui-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 300px;
+    background: rgba(20, 20, 30, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+h1 {
+    font-size: 1.2rem;
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #4facfe;
+}
+
+.control-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    color: #ccc;
+    display: flex;
+    justify-content: space-between;
+}
+
+select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 5px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+select:focus {
+    outline: none;
+    border-color: #4facfe;
+}
+
+details {
+    margin-bottom: 5px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 5px;
+    border-radius: 4px;
+}
+
+summary {
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #4facfe;
+    outline: none;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 15px 0;
+}
+
+.mini-input {
+    width: 50px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    font-size: 0.8rem;
+    padding: 2px;
+    border-radius: 3px;
+    text-align: center;
+}
+
+input[type=number] {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #444;
+    color: white;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+
+.info h3 {
+    margin-top: 0;
+    font-size: 0.9rem;
+    color: #fff;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+}
+
+.info-scroll {
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: #aaa;
+    padding: 5px;
+}
+
+.info-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+.info-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.info-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+input[type=range] {
+    width: 100%;
+    cursor: pointer;
+}
+
+span {
+    align-self: flex-end;
+    font-size: 0.8rem;
+    color: #4facfe;
+    font-variant-numeric: tabular-nums;
+}
+
+.info {
+    margin-top: 20px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: #aaa;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 10px;
+}

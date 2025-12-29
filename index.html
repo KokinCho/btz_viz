@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTZ Black Hole Embedding (AdS3)</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Import Map for Three.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <!-- MathJax for LaTeX -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+    <div id="ui-container">
+        <h1>BTZ Black Hole (AdS3)</h1>
+
+        <div class="control-group">
+            <label for="viz-mode">Visualization Mode</label>
+            <select id="viz-mode">
+                <option value="embedding">4D Embedding (Twisted)</option>
+                <option value="poincare">Poincaré Disk (MERA-like)</option>
+            </select>
+        </div>
+
+
+        <!-- Config Section -->
+        <details>
+            <summary>Parameters ($M, l$)</summary>
+            <div class="control-group">
+                <label for="param-M">Mass ($M$): <span id="val-M">1.0</span></label>
+                <input type="range" id="param-M" min="0.1" max="5.0" step="0.1" value="1.0">
+            </div>
+            <div class="control-group">
+                <label for="param-l">AdS Radius ($l$): <span id="val-l">1.0</span></label>
+                <input type="range" id="param-l" min="0.1" max="5.0" step="0.1" value="1.0">
+            </div>
+            <div class="control-group">
+                <label for="param-phi-limit">Phi Limit (Embedding): <span id="val-phi">1.5</span></label>
+                <input type="range" id="param-phi-limit" min="0.5" max="3.0" step="0.1" value="1.5">
+            </div>
+            <div class="control-group">
+                <label for="param-r-max">Radial Extent ($r_{max}/r_h$): <span id="val-r-max">4.0</span></label>
+                <input type="range" id="param-r-max" min="1.1" max="10.0" step="0.1" value="4.0">
+            </div>
+        </details>
+
+        <hr>
+
+        <div class="control-group">
+            <label for="time">Time (t) <input type="number" id="time-min" value="-1.5" step="0.1" class="mini-input"> to
+                <input type="number" id="time-max" value="1.5" step="0.1" class="mini-input"></label>
+            <input type="range" id="time" min="-1.5" max="1.5" step="0.01" value="0">
+            <span id="time-val">0.00</span>
+        </div>
+
+        <div class="control-group">
+            <label for="param-boost">Lorentz Boost (λ)</label>
+            <input type="range" id="param-boost" min="-2" max="2" step="0.1" value="0">
+            <span id="param-boost-val">0.00</span>
+        </div>
+
+        <div class="control-group">
+            <label for="rotSpatial">Spatial Rotation (X¹-X²)</label>
+            <input type="range" id="rotSpatial" min="0" max="6.28" step="0.01" value="0">
+            <span id="rotSpatial-val">0.00</span>
+        </div>
+
+        <hr>
+
+        <details open>
+            <summary>座標系の説明 (Coordinate Info)</summary>
+            <div class="info-scroll">
+                <p><strong>可視化軸 (双曲面構造):</strong><br>
+                    x軸 = $X^{-1}$ (時間的座標)<br>
+                    y軸 = $X^1$ (空間的座標)<br>
+                    z軸 = $X^2$ (空間的座標)<br>
+                    ※ $X^{-1}$ と $(X^1, X^2)$ の符号の違いで双曲幾何が顕著</p>
+
+                <p><strong>Lorentz Boost (λ):</strong><br>
+                    $(X^0, X^1)$ 平面でのLorentzブースト。<br>
+                    $X'^0 = X^0 \cosh\lambda + X^1 \sinh\lambda$<br>
+                    $X'^1 = X^0 \sinh\lambda + X^1 \cosh\lambda$</p>
+
+                <p><strong>Spatial Rotation:</strong><br>
+                    $(X^1, X^2)$ 平面の純粋な空間的回転</p>
+
+                <hr style="margin: 10px 0; border-color: rgba(255,255,255,0.2);">
+
+                <p><strong>1. AdS3 Embedding Condition:</strong><br>
+                    $-(X^{-1})^2 - (X^0)^2 + (X^1)^2 + (X^2)^2 = -l^2$</p>
+
+                <hr style="margin: 10px 0; border-color: rgba(255,255,255,0.2);">
+
+                <p><strong>2. BTZ Coordinate Mapping:</strong><br>
+                    $X^{-1} = \sqrt{r^2/M} \cosh(\sqrt{M}\phi)$<br>
+                    $X^{2} \;\; = \sqrt{r^2/M} \sinh(\sqrt{M}\phi)$<br>
+                    $X^{0} \;\; = \sqrt{r^2/M - l^2} \sinh(\sqrt{M}t/l)$<br>
+                    $X^{1} \;\; = \sqrt{r^2/M - l^2} \cosh(\sqrt{M}t/l)$</p>
+
+                <hr style="margin: 10px 0; border-color: rgba(255,255,255,0.2);">
+
+                <p><strong>3. Lorentz Boost (Time-Space Mixing):</strong><br>
+                    Parameter $\lambda$ mixes $X^0$ and $X^1$:<br>
+                    $\begin{pmatrix} X'^0 \\ X'^1 \end{pmatrix} = \begin{pmatrix} \cosh\lambda & \sinh\lambda \\
+                    \sinh\lambda & \cosh\lambda \end{pmatrix} \begin{pmatrix} X^0 \\ X^1 \end{pmatrix}$<br>
+                    Preserves $-(X^0)^2 + (X^1)^2$.</p>
+
+                <hr style="margin: 10px 0; border-color: rgba(255,255,255,0.2);">
+
+                <p><strong>4. Poincaré Disk Mapping:</strong><br>
+                    Radial Compactification:<br>
+                    $R_{\text{disk}} = \tanh\left(\frac{r}{2l}\right)$<br>
+                    $x = R_{\text{disk}} \cos\phi, \quad y = R_{\text{disk}} \sin\phi$</p>
+            </div>
+        </details>
+    </div>
+    <div id="canvas-container"></div>
+    <script type="module" src="app.js?v=14"></script>
+</body>
+
+</html>

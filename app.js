@@ -356,32 +356,67 @@ function updateState() {
     val_rotSpatial.innerText = state.rotSpatial.toFixed(2);
 }
 
+// UI Elements
+const ui_param_M = document.getElementById('param-M');
+const ui_param_l = document.getElementById('param-l');
+const ui_param_tau = document.getElementById('param-tau'); // New Inverse Temp Slider
+const ui_phi_limit = document.getElementById('param-phi-limit');
+const ui_r_max_factor = document.getElementById('param-r-max');
+
 // Parameter values display
 const val_M = document.getElementById('val-M');
 const val_l = document.getElementById('val-l');
+const val_tau = document.getElementById('val-tau'); // New Inverse Temp Display
 const val_phi = document.getElementById('val-phi');
 const val_r_max = document.getElementById('val-r-max');
 
-function updateParams() {
-    const new_M = parseFloat(ui_param_M.value);
-    const new_l = parseFloat(ui_param_l.value);
+let isUpdating = false; // Flag to prevent infinite loop in coupled updates
+
+function updateParams(source) {
+    if (isUpdating) return;
+    isUpdating = true;
+
+    let new_M = parseFloat(ui_param_M.value);
+    let new_l = parseFloat(ui_param_l.value);
+    let new_tau = parseFloat(ui_param_tau.value);
     const new_phi = parseFloat(ui_phi_limit.value);
     const new_r_max = parseFloat(ui_r_max_factor.value);
 
+    // Coupling Logic: tau = l / sqrt(M)  =>  M = (l / tau)^2
+    if (source === 'tau') {
+        // User changed tau -> calculate M
+        // Avoid division by zero
+        if (new_tau < 0.01) new_tau = 0.01;
+        new_M = Math.pow(new_l / new_tau, 2);
+
+        // Update M slider UI
+        ui_param_M.value = new_M;
+    } else if (source === 'M' || source === 'l') {
+        // User changed M or l -> calculate tau
+        if (new_M < 0.001) new_M = 0.001; // Avoid sqrt(negative) or zero
+        new_tau = new_l / Math.sqrt(new_M);
+
+        // Update tau slider UI
+        ui_param_tau.value = new_tau;
+    }
+
     // Update value labels
-    val_M.innerText = new_M.toFixed(1);
-    val_l.innerText = new_l.toFixed(1);
+    val_M.innerText = new_M.toFixed(2);
+    val_l.innerText = new_l.toFixed(2);
+    val_tau.innerText = new_tau.toFixed(2);
     val_phi.innerText = new_phi.toFixed(1);
     val_r_max.innerText = new_r_max.toFixed(1);
 
     // Check if grid regeneration needed
-    if (new_M !== CONFIG.M || new_l !== CONFIG.l || new_phi !== state.phi_limit || new_r_max !== CONFIG.r_max_factor) {
+    if (Math.abs(new_M - CONFIG.M) > 0.001 || Math.abs(new_l - CONFIG.l) > 0.001 || new_phi !== state.phi_limit || new_r_max !== CONFIG.r_max_factor) {
         CONFIG.M = new_M;
         CONFIG.l = new_l;
         CONFIG.r_max_factor = new_r_max;
         state.phi_limit = new_phi;
-        initGrid(); // Regenerate grid data
+        initGrid();
     }
+
+    isUpdating = false;
 }
 
 function updateRanges() {
@@ -392,10 +427,8 @@ function updateRanges() {
 // Event Listeners
 [ui_time, ui_boost, ui_rotSpatial].forEach(el => el.addEventListener('input', updateState));
 
-// Parameter Inputs
-[ui_param_M, ui_param_l, ui_phi_limit, ui_r_max_factor].forEach(el => el.addEventListener('input', () => {
-    updateParams();
-    updateMesh();
+updateParams();
+updateMesh();
 }));
 
 // Range Inputs

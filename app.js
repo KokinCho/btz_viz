@@ -332,10 +332,7 @@ const ui_time = document.getElementById('time');
 const ui_boost = document.getElementById('param-boost');
 const ui_rotSpatial = document.getElementById('rotSpatial');
 
-const ui_param_M = document.getElementById('param-M');
-const ui_param_l = document.getElementById('param-l');
-const ui_phi_limit = document.getElementById('param-phi-limit');
-const ui_r_max_factor = document.getElementById('param-r-max');
+// ui_param_M, ui_param_l, ui_phi_limit, ui_r_max_factor are defined below with explicit coupling logic
 
 const ui_time_min = document.getElementById('time-min');
 const ui_time_max = document.getElementById('time-max');

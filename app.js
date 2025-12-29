@@ -347,8 +347,8 @@ function calculateM(beta, l) {
 // Initial Sync
 {
     const initBeta = calculateBeta(CONFIG.M, CONFIG.l);
-    ui_param_beta.value = initBeta.toFixed(1);
-    val_beta.innerText = initBeta.toFixed(1);
+    ui_param_beta.value = initBeta.toFixed(2);
+    val_beta.innerText = initBeta.toFixed(2);
 }
 
 function updateParams(sourceElement) {
@@ -363,26 +363,26 @@ function updateParams(sourceElement) {
     if (sourceElement === ui_param_M || sourceElement === ui_param_l) {
         // M or l changed -> Update Beta
         new_beta = calculateBeta(new_M, new_l);
-        ui_param_beta.value = new_beta.toFixed(1);
+        ui_param_beta.value = new_beta.toFixed(2);
     } else if (sourceElement === ui_param_beta) {
         // Beta changed -> Update M (keep l fixed)
         new_M = calculateM(new_beta, new_l);
         // Clamp M to slider range
         if (new_M < 0.1) new_M = 0.1;
         if (new_M > 5.0) new_M = 5.0;
-        ui_param_M.value = new_M.toFixed(1);
+        ui_param_M.value = new_M.toFixed(2);
 
         // Re-calculate beta if M hit a limit to keep UI consistent
         new_beta = calculateBeta(new_M, new_l);
-        ui_param_beta.value = new_beta.toFixed(1);
+        ui_param_beta.value = new_beta.toFixed(2);
     }
 
     // Update value labels
-    val_M.innerText = new_M.toFixed(1);
-    val_l.innerText = new_l.toFixed(1);
-    val_phi.innerText = new_phi.toFixed(1);
-    val_beta.innerText = new_beta.toFixed(1);
-    val_r_max.innerText = new_r_max.toFixed(1);
+    val_M.innerText = new_M.toFixed(2);
+    val_l.innerText = new_l.toFixed(2);
+    val_phi.innerText = new_phi.toFixed(2);
+    val_beta.innerText = new_beta.toFixed(2);
+    val_r_max.innerText = new_r_max.toFixed(2);
 
     // Check if grid regeneration needed
     if (Math.abs(new_M - CONFIG.M) > 0.01 || Math.abs(new_l - CONFIG.l) > 0.01 || new_phi !== state.phi_limit || new_r_max !== CONFIG.r_max_factor) {

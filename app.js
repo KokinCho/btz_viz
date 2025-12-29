@@ -394,6 +394,19 @@ function updateRanges() {
 // Range Inputs
 [ui_time_min, ui_time_max].forEach(el => el.addEventListener('change', updateRanges));
 
+// UI Toggle Logic (Mobile)
+const ui_container = document.getElementById('ui-container');
+const ui_toggle = document.getElementById('ui-toggle');
+
+ui_toggle.addEventListener('click', () => {
+    ui_container.classList.toggle('hidden-mobile');
+});
+
+// Initial State: Hide panel on small screens
+if (window.innerWidth <= 768) {
+    ui_container.classList.add('hidden-mobile');
+}
+
 // Mode Switch
 ui_mode.addEventListener('change', () => {
     updateState();

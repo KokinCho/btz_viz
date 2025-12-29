@@ -192,4 +192,44 @@ span {
         font-size: 1rem;
         /* Readable font size */
     }
+
+    /* Mobile Toggle Button */
+    #ui-toggle {
+        display: block;
+        /* Visible on mobile */
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1001;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(20, 20, 30, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #fff;
+        font-size: 1.5rem;
+        cursor: pointer;
+        backdrop-filter: blur(5px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Panel Hidden State (Slide Down) */
+    #ui-container.hidden-mobile {
+        transform: translateY(110%);
+        /* Slide out of view */
+        pointer-events: none;
+        /* Prevent accidental touches when hidden */
+    }
+
+    /* Panel Default Transition */
+    #ui-container {
+        transition: transform 0.3s ease-in-out;
+    }
+}
+
+/* Hide toggle button on desktop */
+@media (min-width: 769px) {
+    #ui-toggle {
+        display: none;
+    }
 }

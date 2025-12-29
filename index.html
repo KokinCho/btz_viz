@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BTZ Black Hole Embedding (AdS3)</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- ES Module Shims for wider browser compatibility -->
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+
     <!-- Import Map for Three.js -->
     <script type="importmap">
         {
@@ -27,9 +31,30 @@
         };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Global Error Handler -->
+    <script>
+        window.addEventListener('error', function (e) {
+            const errDiv = document.getElementById('error-overlay');
+            if (errDiv) {
+                errDiv.style.display = 'block';
+                errDiv.innerText += `Error: ${e.message}\n`;
+            }
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+            const errDiv = document.getElementById('error-overlay');
+            if (errDiv) {
+                errDiv.style.display = 'block';
+                errDiv.innerText += `Promise Error: ${e.reason}\n`;
+            }
+        });
+    </script>
 </head>
 
 <body>
+    <div id="error-overlay"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); color:red; z-index:9999; padding:20px; white-space:pre-wrap; font-family:monospace; pointer-events:none;">
+    </div>
     <!-- Toggle Button for Mobile (Outside container to remain visible) -->
     <button id="ui-toggle" aria-label="Toggle Settings">⚙️</button>
 
@@ -137,7 +162,7 @@
         </details>
     </div>
     <div id="canvas-container"></div>
-    <script type="module" src="app.js?v=15"></script>
+    <script type="module" src="app.js?v=16"></script>
 </body>
 
 </html>

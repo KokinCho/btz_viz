@@ -127,9 +127,16 @@ const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerH
 camera.position.set(8, 8, 6); // Increased from (3, 3, 2) for better overview
 camera.up.set(0, 0, 1);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, failIfMajorPerformanceCaveat: false });
+if (!renderer.capabilities.isWebGL2 && !renderer.capabilities.isWebGL1) {
+    throw new Error("Your browser does not support WebGL, which is required for this visualization.");
+}
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
+renderer.domElement.addEventListener('webglcontextlost', (event) => {
+    event.preventDefault();
+    alert('WebGL Context Lost. Please reload the page.');
+}, false);
 container.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);

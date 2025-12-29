@@ -332,8 +332,17 @@ const ui_time = document.getElementById('time');
 const ui_boost = document.getElementById('param-boost');
 const ui_rotSpatial = document.getElementById('rotSpatial');
 
-// Removed duplicate parameter declarations (they are declared below with tau)
+const ui_param_M = document.getElementById('param-M');
+const ui_param_l = document.getElementById('param-l');
+const ui_phi_limit = document.getElementById('param-phi-limit');
+const ui_r_max_factor = document.getElementById('param-r-max');
 
+const ui_time_min = document.getElementById('time-min');
+const ui_time_max = document.getElementById('time-max');
+
+const val_time = document.getElementById('time-val');
+const val_boost = document.getElementById('param-boost-val');
+const val_rotSpatial = document.getElementById('rotSpatial-val');
 
 function updateState() {
     state.t = parseFloat(ui_time.value);
@@ -416,9 +425,10 @@ function updateRanges() {
 }
 
 // Event Listeners
+// Event Listeners
 [ui_time, ui_boost, ui_rotSpatial].forEach(el => el.addEventListener('input', updateState));
 
-updateParams();
+updateParams(); // Initial param sync
 updateMesh();
 
 // Range Inputs
